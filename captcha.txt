@@ -1,0 +1,88 @@
+import javax.swing.*; import java.awt.*; import java.awt.event.*; import 
+java.awt.image.BufferedImage; import java.security.SecureRandom;  
+  
+public class CaptchaEngine extends JPanel {  
+  
+    private String captchaText;     private BufferedImage captchaImage;  
+    private final JTextField inputField = new JTextField(10);     private final JButton validateButton = new 
+JButton("Validate");     private final JLabel statusLabel = new JLabel("");  
+  
+    public CaptchaEngine() {         setLayout(new BorderLayout());  
+  
+        generateCaptcha();  
+  
+        JPanel topPanel = new JPanel();  
+        topPanel.add(new JLabel(new ImageIcon(captchaImage)));  
+  
+        JPanel centerPanel = new JPanel();         centerPanel.add(new JLabel("Enter CAPTCHA:")); 
+centerPanel.add(inputField);  
+        centerPanel.add(validateButton);  
+  
+        add(topPanel, BorderLayout.NORTH);         add(centerPanel, BorderLayout.CENTER);         
+add(statusLabel, BorderLayout.SOUTH);  
+  
+        validateButton.addActionListener(e -> validateCaptcha());  
+    }  
+  
+    private void generateCaptcha() {         captchaText = generateRandomText(6);         captchaImage = 
+generateCaptchaImage(captchaText);  
+    }  
+  
+    private String generateRandomText(int length) {  
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";  
+        SecureRandom rnd = new SecureRandom();         StringBuilder sb = new StringBuilder();         
+while (sb.length() < length) {  
+            int index = (int) (rnd.nextFloat() * chars.length());             sb.append(chars.charAt(index));  
+        }  
+        return sb.toString();  
+    }  
+  
+    private BufferedImage generateCaptchaImage(String text) {  
+BufferedImage image = new BufferedImage(160, 60, BufferedImage.TYPE_INT_RGB);  
+        Graphics2D g = image.createGraphics();  
+  
+        // Background  
+        g.setColor(Color.WHITE);  
+        g.fillRect(0, 0, 160, 60);  
+  
+        // Noise  
+        g.setColor(Color.LIGHT_GRAY);  
+        for (int i = 0; i < 30; i++) {             int x = (int) (Math.random() * 160);             int y = (int) 
+(Math.random() * 60);             int xl = (int) (Math.random() * 20);             int yl = (int) (Math.random() * 
+20);  
+            g.drawLine(x, y, x + xl, y + yl);  
+        }   
+        // Text  
+        g.setFont(new Font("Arial", Font.BOLD, 30));  
+        g.setColor(Color.BLACK);  
+        g.drawString(text, 20, 40);  
+  
+        g.dispose();         return image;  
+    }  
+  
+    private void validateCaptcha() {  
+String input = inputField.getText();         if (input.equalsIgnoreCase(captchaText)) {  
+statusLabel.setText("CAPTCHA validated successfully!");             
+statusLabel.setForeground(Color.GREEN);  
+} else {  
+statusLabel.setText("Incorrect CAPTCHA. Try again.");             
+statusLabel.setForeground(Color.RED);             
+generateCaptcha();             
+repaint();  
+}  
+}   
+@Override  
+protected void paintComponent(Graphics g) {         
+inputField.setText("");             
+super.paintComponent(g);  
+}   
+// Test main method  
+public static void main(String[] args) {  
+JFrame frame = new JFrame("Reusable CAPTCHA Engine");         
+frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);        
+frame.setSize(300, 200);         
+}  
+} 
+frame.setLocationRelativeTo(null);         
+ frame.add(new CaptchaEngine());         
+frame.setVisible(true);  
